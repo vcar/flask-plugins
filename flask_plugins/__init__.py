@@ -224,7 +224,7 @@ class PluginManager(object):
         if app is not None:
             self.init_app(app, **kwargs)
 
-    def init_app(self, app, base_app_folder=None, plugin_folder="plugins"):
+    def init_apppppp(self, app, base_app_folder=None, plugin_folder="plugins"):
         self._event_manager = EventManager(app)
         app.jinja_env.globals["emit_event"] = self._event_manager.template_emit
 
@@ -238,9 +238,26 @@ class PluginManager(object):
             base_app_folder = self.app.root_path.split(os.sep)[-1]
 
         self.plugin_folder = os.path.join(self.app.root_path, plugin_folder)
+        base_plugin_folder = self.plugin_folder.split(os.sep)[-1]
         self.base_plugin_package = ".".join(
-            [base_app_folder, plugin_folder]
+            [base_app_folder, base_plugin_folder]
         )
+        self.setup_plugins()
+
+    def init_app(self, app, plugin_folder, plugin_import_path):
+        self._event_manager = EventManager(app)
+
+        app.plugin_manager = self
+        app.jinja_env.globals["emit_event"] = self._event_manager.template_emit
+
+        if not hasattr(app, 'extensions'):
+            app.extensions = {}
+        app.extensions['plugin_manager'] = self
+
+        self.app = app
+
+        self.plugin_folder = plugin_folder
+        self.base_plugin_package = plugin_import_path
 
         self.setup_plugins()
 
